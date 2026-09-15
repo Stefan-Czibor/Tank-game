@@ -1,0 +1,16 @@
+# CLion
+.idea/
+
+# CMake build files
+cmake-build-*/
+build/
+
+# Environment / secrets
+.env
+
+# Compiled binaries
+*.exe
+*.out
+
+# macOS
+.DS_Store
