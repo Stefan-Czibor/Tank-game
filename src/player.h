@@ -5,22 +5,30 @@
 #ifndef TANK_GAME_PLAYER_H
 #define TANK_GAME_PLAYER_H
 #include "SFML/System/Vector2.hpp"
+#include "SFML/System/Time.hpp"
+#include "SFML/Graphics/RenderWindow.hpp"
+#include "SFML/Graphics/RectangleShape.hpp"
+
+constexpr sf::Color PLAYER_COLOR = sf::Color::Green;
 
 class Player {
 public:
     sf::Vector2f position;
     sf::Vector2f velocity;
-    sf::Vector2i size;
+    sf::Vector2f size;
+    sf::RectangleShape shape;
 
-    Player(float x, float y, float vx, float vy, int width, int height) {
+    Player(float x, float y, float vx, float vy, float width, float height) {
         position = sf::Vector2f(x, y);
         velocity = sf::Vector2f(vx, vy);
-        size = sf::Vector2i(width, height);
+        shape.setPosition(position);
+        shape.setFillColor(PLAYER_COLOR);
+        shape.setSize(sf::Vector2f(width, height));
     }
 
-    void update();
-    void draw();
-    
+    void update(sf::Time deltaTime);
+    void draw(sf::RenderWindow &window);
+
 };
 
 #endif //TANK_GAME_PLAYER_H
