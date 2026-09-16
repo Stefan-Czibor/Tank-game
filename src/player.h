@@ -17,6 +17,10 @@ public:
         velocity = sf::Vector2f(vx, vy);
         size = sf::Vector2i(width, height);
     }
+
+    void update();
+    void draw();
+    
 };
 
 #endif //TANK_GAME_PLAYER_H
