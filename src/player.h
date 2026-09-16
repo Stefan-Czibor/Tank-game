@@ -27,7 +27,7 @@ public:
     }
 
     void update(sf::Time deltaTime);
-    void draw(sf::RenderWindow &window);
+    void draw(sf::RenderWindow &window) const;
 
 };
 

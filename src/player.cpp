@@ -9,6 +9,6 @@ void Player::update(sf::Time deltaTime) {
     shape.setPosition(position);
 }
 
-void Player::draw(sf::RenderWindow &window) {
+void Player::draw(sf::RenderWindow &window) const {
     window.draw(shape);
 }
