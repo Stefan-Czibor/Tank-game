@@ -16,6 +16,7 @@ FetchContent_MakeAvailable(SFML)
 
 add_executable(Tank-game
     src/main.cpp
+        src/player.h
 )
 
 target_link_libraries(Tank-game PRIVATE SFML::Graphics)
