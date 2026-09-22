@@ -18,9 +18,9 @@ public:
     sf::Vector2f size;
     sf::RectangleShape shape;
 
-    Player(float x, float y, float vx, float vy, float width, float height) {
+    Player(float x, float y, float width, float height) {
         position = sf::Vector2f(x, y);
-        velocity = sf::Vector2f(vx, vy);
+        velocity = sf::Vector2f(0, 0);
         shape.setPosition(position);
         shape.setFillColor(PLAYER_COLOR);
         shape.setSize(sf::Vector2f(width, height));
