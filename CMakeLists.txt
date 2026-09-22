@@ -18,6 +18,8 @@ add_executable(Tank-game
     src/main.cpp
         src/player.h
         src/player.cpp
+        src/inputHandle.cpp
+        src/inputHandle.h
 )
 
 target_link_libraries(Tank-game PRIVATE SFML::Graphics)

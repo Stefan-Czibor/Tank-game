@@ -1,15 +1,24 @@
 #include "SFML/Graphics.hpp"
 #include "player.h"
 
+//============== GAME WINDOW ============
 constexpr int FPS = 60;
 constexpr int SCREEN_WIDTH = 600;
 constexpr int SCREEN_HEIGHT = 400;
+
+//============== PLAYER =================
+constexpr float PLAYER_X = 30;
+constexpr float PLAYER_Y = 30;
+constexpr float PLAYER_SPEED_X = 3;
+constexpr float PLAYER_SPEED_Y = 3;
+constexpr float PLAYER_WIDTH = 40;
+constexpr float PLAYER_HEIGHT = 40;
 
 int main() {
     sf::RenderWindow window(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Tank");
     window.setFramerateLimit(FPS);
 
-    Player player(30, 30, 3, 3, 40, 40);
+    Player player(PLAYER_X, PLAYER_SPEED_Y, PLAYER_SPEED_X, PLAYER_SPEED_Y, PLAYER_WIDTH, PLAYER_HEIGHT);
     sf::Clock clock;
 
     while (window.isOpen()) {
