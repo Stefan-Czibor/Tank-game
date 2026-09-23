@@ -17,7 +17,8 @@ int nextPlayerID = 0;
 
 
 void handleClient(sf::TcpSocket* socket, int playerID) {
-
+    sf::Packet packet;
+    // packet << playerID << x << y;
 }
 
 int server_main() {

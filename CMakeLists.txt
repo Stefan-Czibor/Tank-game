@@ -21,6 +21,8 @@ add_executable(Tank-game
         src/inputHandle.cpp
         src/inputHandle.h
         src/server_main.cpp
+        src/network_protokol.h
+        src/network_protocol.cpp
 )
 
 target_link_libraries(Tank-game PRIVATE
