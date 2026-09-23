@@ -8,8 +8,7 @@
 #include "SFML/System/Time.hpp"
 #include "SFML/Graphics/RenderWindow.hpp"
 #include "SFML/Graphics/RectangleShape.hpp"
-
-constexpr sf::Color PLAYER_COLOR = sf::Color::Green;
+#include "game_constans.h"
 
 class Player {
 public:
@@ -19,12 +18,12 @@ public:
     sf::RectangleShape shape;
     int playerID;
 
-    Player(int playerID, float x, float y, float width, float height) {
+    Player(int playerID, float x, float y) {
         position = sf::Vector2f(x, y);
         velocity = sf::Vector2f(0, 0);
         shape.setPosition(position);
         shape.setFillColor(PLAYER_COLOR);
-        shape.setSize(sf::Vector2f(width, height));
+        shape.setSize(sf::Vector2f(PLAYER_WIDTH, PLAYER_HEIGHT));
         this->playerID = playerID;
     }
 

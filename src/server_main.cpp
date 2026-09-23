@@ -43,7 +43,7 @@ int server_main() {
                 assignedID = nextPlayerID;
                 nextPlayerID++;
 
-                auto newPlayer = Player(assignedID, 40, 40, 40 ,40);
+                auto newPlayer = Player(assignedID, 40, 40);
                 players.emplace(assignedID, newPlayer);
             }
 

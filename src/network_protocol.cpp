@@ -17,5 +17,16 @@ sf::Packet serializeData(const std::unordered_map<int, Player> &players) {
 }
 
 std::unordered_map<int, Player> deserializeData(sf::Packet &packet) {
-    
+    std::unordered_map<int, Player> players;
+    int playerCount;
+    packet >> playerCount;
+
+    int playerID;
+    float playerX, playerY;
+    for (int i = 0; i < playerCount; i++) {
+        packet >> playerID >> playerX >> playerY;
+        players.emplace(playerID, Player(playerID, playerX, playerY));
+    }
+
+    return players;
 }

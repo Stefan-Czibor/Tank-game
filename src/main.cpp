@@ -1,18 +1,7 @@
 #include "SFML/Graphics.hpp"
 #include "player.h"
 #include "inputHandle.h"
-
-//============== GAME WINDOW ============
-constexpr int FPS = 60;
-constexpr int SCREEN_WIDTH = 600;
-constexpr int SCREEN_HEIGHT = 400;
-
-//============== PLAYER =================
-constexpr float PLAYER_X = 30;
-constexpr float PLAYER_Y = 30;
-constexpr float PLAYER_SPEED = 100;
-constexpr float PLAYER_WIDTH = 40;
-constexpr float PLAYER_HEIGHT = 40;
+#include "game_constans.h"
 
 static void updateScreen(Player &player, const sf::Time &deltaTime, sf::RenderWindow &window) {
     sf::Vector2f direction = inputHandle::getMovementDirection();
@@ -27,7 +16,7 @@ int main() {
     sf::RenderWindow window(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Tank");
     window.setFramerateLimit(FPS);
 
-    Player player(0, PLAYER_X, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT);
+    Player player(0, PLAYER_X, PLAYER_Y);
     sf::Clock clock;
 
     while (window.isOpen()) {
