@@ -17,13 +17,15 @@ public:
     sf::Vector2f velocity;
     sf::Vector2f size;
     sf::RectangleShape shape;
+    int playerID;
 
-    Player(float x, float y, float width, float height) {
+    Player(int playerID, float x, float y, float width, float height) {
         position = sf::Vector2f(x, y);
         velocity = sf::Vector2f(0, 0);
         shape.setPosition(position);
         shape.setFillColor(PLAYER_COLOR);
         shape.setSize(sf::Vector2f(width, height));
+        this->playerID = playerID;
     }
 
     void update(sf::Time deltaTime);
