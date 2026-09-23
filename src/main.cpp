@@ -27,7 +27,7 @@ int main() {
     sf::RenderWindow window(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Tank");
     window.setFramerateLimit(FPS);
 
-    Player player(PLAYER_X, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT);
+    Player player(0, PLAYER_X, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT);
     sf::Clock clock;
 
     while (window.isOpen()) {

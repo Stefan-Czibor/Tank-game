@@ -23,4 +23,6 @@ add_executable(Tank-game
         src/server_main.cpp
 )
 
-target_link_libraries(Tank-game PRIVATE SFML::Graphics)
+target_link_libraries(Tank-game PRIVATE
+        SFML::Graphics
+        SFML::Network)
