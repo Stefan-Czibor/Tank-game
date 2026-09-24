@@ -6,14 +6,23 @@
 #include "game_constants.h"
 #include "SFML/Network/TcpSocket.hpp"
 #include "SFML/Network/Packet.hpp"
+#include <unordered_map>
+#include <mutex>
 
-static void updateScreen(Player &player, const sf::Time &deltaTime, sf::RenderWindow &window) {
+std::unordered_map<int, Player> players;
+std::mutex playersMutex;
+
+static void updateScreen(sf::RenderWindow &window, sf::Time deltaTime, int myID) {
+    std::lock_guard<std::mutex> lock(playersMutex);
+
     sf::Vector2f direction = inputHandle::getMovementDirection();
     direction = direction * PLAYER_SPEED;   // direction vector with real length
-    player.velocity = direction;
+    players[myID].velocity = direction;
 
-    player.update(deltaTime);
-    player.draw(window);
+    for ( auto& [id, player]: players) {
+        player.update(deltaTime);
+        player.draw(window);
+    }
 }
 
 static void connectToServer(sf::TcpSocket &socket, int &myID) {
@@ -36,15 +45,18 @@ int main() {
     sf::RenderWindow window(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Tank");
     window.setFramerateLimit(FPS);
 
-    Player player(0, PLAYER_X, PLAYER_Y);
     sf::Clock clock;
 
     sf::TcpSocket socket;
     int myID = -1;
     connectToServer(socket, myID);
 
-    while (window.isOpen()) {
+    {
+        std::lock_guard<std::mutex> lock(playersMutex);
+        players.emplace(myID, Player(myID, PLAYER_X, PLAYER_Y));
+    }
 
+    while (window.isOpen()) {
         sf::Time deltaTime = clock.restart();
 
          while (const std::optional<sf::Event>& event = window.pollEvent()) {
@@ -53,7 +65,7 @@ int main() {
             }
 
         window.clear();     // paint the display black
-        updateScreen(player, deltaTime, window);
+        updateScreen(window, deltaTime, myID);
         window.display();   // display the actual image
 
     }

@@ -14,13 +14,13 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(SFML)
 
+# ============ CLIENT ==============
 add_executable(Tank-game
     src/main.cpp
         src/player.h
         src/player.cpp
         src/inputHandle.cpp
         src/inputHandle.h
-        src/server_main.cpp
         src/network_protokol.h
         src/network_protocol.cpp
         src/game_constants.h
@@ -29,3 +29,17 @@ add_executable(Tank-game
 target_link_libraries(Tank-game PRIVATE
         SFML::Graphics
         SFML::Network)
+
+# ============= SERVER ===============
+add_executable(Tank-server
+        src/server_main.cpp
+        src/player.h
+        src/player.cpp
+        src/network_protokol.h
+        src/network_protocol.cpp
+        src/game_constants.h
+)
+
+target_link_libraries(Tank-server PRIVATE
+        SFML::Network
+        SFML::System)
