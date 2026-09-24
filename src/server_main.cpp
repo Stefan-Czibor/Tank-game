@@ -7,17 +7,74 @@
 #include <mutex>
 #include <thread>
 #include <iostream>
-#include "player.h"
 
-constexpr int PORT = 2000;  // specific ports are 0-1023 everything above is free
+#include "network_protokol.h"
+#include "player.h"
 
 std::unordered_map<int, Player> players;
 std::mutex playersMutex;
 int nextPlayerID = 0;
 
+static int sendClientID(sf::TcpSocket* socket) {    // sends client id & returns it
+    int assignedID;
+    {
+        std::lock_guard lock(playersMutex);     // locks the mutex until the end of this block
+        assignedID = nextPlayerID;
+        nextPlayerID++;
 
-void handleClient(sf::TcpSocket* socket, int playerID) {
+        auto newPlayer = Player(assignedID, 40, 40);
+        players.emplace(assignedID, newPlayer);
+    }
 
+    sf::Packet idPacket;
+    idPacket << assignedID;
+    sf::Socket::Status sendStatus = socket->send(idPacket);
+    if (sendStatus != sf::Socket::Status::Done) {
+        std::cerr << "Nem sikerült elküldeni az ID-t a kliensnek!" << std::endl;
+    }
+
+    return assignedID;
+}
+
+static void updatePlayerPosition2Client(sf::Packet& getPacket, const int &playerID) {
+    sf::Vector2f newPosition = deserializeOnePlayer(getPacket);
+
+    {
+        std::lock_guard lock(playersMutex);
+        players[playerID].position = newPosition;
+    }
+}
+
+static void sendPlayersPosition(sf::TcpSocket* socket) {
+    sf::Packet sendPacket;
+    {
+        std::lock_guard lock(playersMutex);
+        sendPacket = serializeData(players);
+    }
+
+    sf::Socket::Status sendStatus = socket->send(sendPacket);
+    if (sendStatus != sf::Socket::Status::Done)
+        std::cerr << "Couldn't send data" << std::endl;
+}
+
+static void handleClient(sf::TcpSocket* socket, int playerID) {
+    while (true) {
+        sf::Packet getPacket;
+        sf::Socket::Status recieveStatus = socket->receive(getPacket);
+
+        if (recieveStatus == sf::Socket::Status::Disconnected || recieveStatus == sf::Socket::Status::Error) {
+            {
+                std::lock_guard lock(playersMutex);
+                players.erase(playerID);
+            }
+            break;
+        }
+
+        updatePlayerPosition2Client(getPacket, playerID);
+        sendPlayersPosition(socket);
+
+    }
+    delete socket;
 }
 
 int server_main() {
@@ -36,15 +93,7 @@ int server_main() {
         if (listener.accept(*socket) == sf::Socket::Status::Done) { // if connection is successfull
             std::cout << "Connection accepted." << std::endl;
 
-            int assignedID;
-            {
-                std::lock_guard lock(playersMutex);     // locks the mutex until the end of this block
-                assignedID = nextPlayerID;
-                nextPlayerID++;
-
-                auto newPlayer = Player(assignedID, 40, 40, 40 ,40);
-                players.emplace(assignedID, newPlayer);
-            }
+            int assignedID = sendClientID(socket);
 
             std::thread t(handleClient, socket, assignedID);    // new thread for the new player
             clientThreads.push_back(std::move(t));  // thread can't be copied so we have to move the whole thing

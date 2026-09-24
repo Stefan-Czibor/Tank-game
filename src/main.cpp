@@ -1,37 +1,62 @@
+#include <iostream>
+
 #include "SFML/Graphics.hpp"
 #include "player.h"
 #include "inputHandle.h"
+#include "game_constants.h"
+#include "SFML/Network/TcpSocket.hpp"
+#include "SFML/Network/Packet.hpp"
+#include <unordered_map>
+#include <mutex>
 
-//============== GAME WINDOW ============
-constexpr int FPS = 60;
-constexpr int SCREEN_WIDTH = 600;
-constexpr int SCREEN_HEIGHT = 400;
+std::unordered_map<int, Player> players;
+std::mutex playersMutex;
 
-//============== PLAYER =================
-constexpr float PLAYER_X = 30;
-constexpr float PLAYER_Y = 30;
-constexpr float PLAYER_SPEED = 100;
-constexpr float PLAYER_WIDTH = 40;
-constexpr float PLAYER_HEIGHT = 40;
+static void updateScreen(sf::RenderWindow &window, sf::Time deltaTime, int myID) {
+    std::lock_guard<std::mutex> lock(playersMutex);
 
-static void updateScreen(Player &player, const sf::Time &deltaTime, sf::RenderWindow &window) {
     sf::Vector2f direction = inputHandle::getMovementDirection();
     direction = direction * PLAYER_SPEED;   // direction vector with real length
-    player.velocity = direction;
+    players[myID].velocity = direction;
 
-    player.update(deltaTime);
-    player.draw(window);
+    for ( auto& [id, player]: players) {
+        player.update(deltaTime);
+        player.draw(window);
+    }
+}
+
+static void connectToServer(sf::TcpSocket &socket, int &myID) {
+    if (socket.connect(IP, PORT) != sf::Socket::Status::Done) {
+        std::cerr << "Could not connect to server!" << std::endl;
+        return;
+    }
+
+    sf::Packet packet;
+    sf::Socket::Status status = socket.receive(packet);
+
+    if (status != sf::Socket::Status::Done) {
+        std::cerr << "Could not connect to server!" << std::endl;
+        return;
+    }
+    packet >> myID;
 }
 
 int main() {
     sf::RenderWindow window(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Tank");
     window.setFramerateLimit(FPS);
 
-    Player player(0, PLAYER_X, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT);
     sf::Clock clock;
 
-    while (window.isOpen()) {
+    sf::TcpSocket socket;
+    int myID = -1;
+    connectToServer(socket, myID);
 
+    {
+        std::lock_guard<std::mutex> lock(playersMutex);
+        players.emplace(myID, Player(myID, PLAYER_X, PLAYER_Y));
+    }
+
+    while (window.isOpen()) {
         sf::Time deltaTime = clock.restart();
 
          while (const std::optional<sf::Event>& event = window.pollEvent()) {
@@ -40,7 +65,7 @@ int main() {
             }
 
         window.clear();     // paint the display black
-        updateScreen(player, deltaTime, window);
+        updateScreen(window, deltaTime, myID);
         window.display();   // display the actual image
 
     }
