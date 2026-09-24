@@ -8,7 +8,7 @@
 #include "SFML/System/Time.hpp"
 #include "SFML/Graphics/RenderWindow.hpp"
 #include "SFML/Graphics/RectangleShape.hpp"
-#include "game_constans.h"
+#include "game_constants.h"
 
 class Player {
 public:

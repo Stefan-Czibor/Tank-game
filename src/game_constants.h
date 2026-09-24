@@ -6,7 +6,7 @@
 #define TANK_GAME_GAME_CONSTANS_H
 
 #include <SFML/Graphics/Color.hpp>
-#include "SFML/Network/IpAddress.hpp"
+#include <SFML/Network/IpAddress.hpp>
 
 //============== GAME WINDOW ============
 constexpr int FPS = 60;
@@ -23,6 +23,6 @@ constexpr sf::Color PLAYER_COLOR = sf::Color::Green;
 
 // =============== NETWORK ==============
 constexpr int PORT = 2000;  // specific ports are 0-1023 everything above is free
-sf::IpAddress LOCAL_HOST = sf::IpAddress::LocalHost;
+inline const sf::IpAddress IP = sf::IpAddress::LocalHost;
 
 #endif //TANK_GAME_GAME_CONSTANTS_H

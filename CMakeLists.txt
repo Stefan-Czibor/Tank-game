@@ -23,7 +23,7 @@ add_executable(Tank-game
         src/server_main.cpp
         src/network_protokol.h
         src/network_protocol.cpp
-        src/game_constans.h
+        src/game_constants.h
 )
 
 target_link_libraries(Tank-game PRIVATE
