@@ -8,8 +8,14 @@
 #include <SFML/Network.hpp>
 #include "player.h"
 
-sf::Packet serializeData(const std::unordered_map<int, Player> &players);
 
+// Server -> client communication protocol
+sf::Packet serializeData(const std::unordered_map<int, Player> &players);
 std::unordered_map<int, Player> deserializeData(sf::Packet &packet);
+
+// Client -> server communication protocol
+sf::Packet serializeOnePlayer(sf::Vector2f& position);
+sf::Vector2f deserializeOnePlayer(sf::Packet& packet);
+
 
 #endif //TANK_GAME_NETWORK_PROTOKOL_H

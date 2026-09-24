@@ -7,6 +7,8 @@
 #include <mutex>
 #include <thread>
 #include <iostream>
+
+#include "network_protokol.h"
 #include "player.h"
 
 constexpr int PORT = 2000;  // specific ports are 0-1023 everything above is free
@@ -15,10 +17,38 @@ std::unordered_map<int, Player> players;
 std::mutex playersMutex;
 int nextPlayerID = 0;
 
+static void handleClient(sf::TcpSocket* socket, int playerID) {
+    while (true) {
+        sf::Packet getPacket;
+        sf::Socket::Status recieveStatus = socket->receive(getPacket);
 
-void handleClient(sf::TcpSocket* socket, int playerID) {
-    sf::Packet packet;
-    // packet << playerID << x << y;
+        if (recieveStatus == sf::Socket::Status::Disconnected || recieveStatus == sf::Socket::Status::Error) {
+            {
+                std::lock_guard lock(playersMutex);
+                players.erase(playerID);
+            }
+            break;
+        }
+
+        sf::Vector2f newPosition = deserializeOnePlayer(getPacket);
+
+        {
+            std::lock_guard lock(playersMutex);
+            players[playerID].position = newPosition;
+        }
+
+        sf::Packet sendPacket;
+        {
+            std::lock_guard lock(playersMutex);
+            sendPacket = serializeData(players);
+        }
+
+        sf::Socket::Status sendStatus = socket->send(sendPacket);
+        if (sendStatus != sf::Socket::Status::Done) {
+            std::cerr << "Couldn't send data" << std::endl;
+        }
+    }
+    delete socket;
 }
 
 int server_main() {

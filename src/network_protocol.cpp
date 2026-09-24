@@ -5,6 +5,9 @@
 #include <SFML/Network.hpp>
 #include "player.h"
 
+
+// ======================== Server -> client ==============================
+
 sf::Packet serializeData(const std::unordered_map<int, Player> &players) {
     sf::Packet packet;
     int playerCount = static_cast<int>(players.size());
@@ -29,4 +32,18 @@ std::unordered_map<int, Player> deserializeData(sf::Packet &packet) {
     }
 
     return players;
+}
+
+// ======================== Client -> server ==============================
+
+sf::Packet serializeOnePlayer(const sf::Vector2f& position) {
+    sf::Packet packet;
+    packet << position.x << position.y;
+    return packet;
+}
+
+sf::Vector2f deserializeOnePlayer(sf::Packet& packet) {
+    float x, y;
+    packet >> x >> y;
+    return {x, y};
 }

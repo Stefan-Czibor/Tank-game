@@ -16,7 +16,7 @@ public:
     sf::Vector2f velocity;
     sf::Vector2f size;
     sf::RectangleShape shape;
-    int playerID;
+    int playerID{};
 
     Player(int playerID, float x, float y) {
         position = sf::Vector2f(x, y);
@@ -26,6 +26,8 @@ public:
         shape.setSize(sf::Vector2f(PLAYER_WIDTH, PLAYER_HEIGHT));
         this->playerID = playerID;
     }
+
+    Player() = default;
 
     void update(sf::Time deltaTime);
     void draw(sf::RenderWindow &window) const;
