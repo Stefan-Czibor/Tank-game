@@ -17,6 +17,27 @@ std::unordered_map<int, Player> players;
 std::mutex playersMutex;
 int nextPlayerID = 0;
 
+static void updatePlayerPosition2Client(sf::Packet& getPacket, const int &playerID) {
+    sf::Vector2f newPosition = deserializeOnePlayer(getPacket);
+
+    {
+        std::lock_guard lock(playersMutex);
+        players[playerID].position = newPosition;
+    }
+}
+
+static void sendPlayersPosition(sf::TcpSocket* socket) {
+    sf::Packet sendPacket;
+    {
+        std::lock_guard lock(playersMutex);
+        sendPacket = serializeData(players);
+    }
+
+    sf::Socket::Status sendStatus = socket->send(sendPacket);
+    if (sendStatus != sf::Socket::Status::Done)
+        std::cerr << "Couldn't send data" << std::endl;
+}
+
 static void handleClient(sf::TcpSocket* socket, int playerID) {
     while (true) {
         sf::Packet getPacket;
@@ -30,23 +51,9 @@ static void handleClient(sf::TcpSocket* socket, int playerID) {
             break;
         }
 
-        sf::Vector2f newPosition = deserializeOnePlayer(getPacket);
+        updatePlayerPosition2Client(getPacket, playerID);
+        sendPlayersPosition(socket);
 
-        {
-            std::lock_guard lock(playersMutex);
-            players[playerID].position = newPosition;
-        }
-
-        sf::Packet sendPacket;
-        {
-            std::lock_guard lock(playersMutex);
-            sendPacket = serializeData(players);
-        }
-
-        sf::Socket::Status sendStatus = socket->send(sendPacket);
-        if (sendStatus != sf::Socket::Status::Done) {
-            std::cerr << "Couldn't send data" << std::endl;
-        }
     }
     delete socket;
 }
