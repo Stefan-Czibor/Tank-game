@@ -6,8 +6,11 @@
 #include "game_constants.h"
 #include "SFML/Network/TcpSocket.hpp"
 #include "SFML/Network/Packet.hpp"
+#include "network_protokol.h"
 #include <unordered_map>
 #include <mutex>
+#include <functional>
+#include <thread>
 
 std::unordered_map<int, Player> players;
 std::mutex playersMutex;
@@ -41,6 +44,40 @@ static void connectToServer(sf::TcpSocket &socket, int &myID) {
     packet >> myID;
 }
 
+static void sendDataToServer(sf::TcpSocket &socket, int &myID) {
+    sf::Packet sendPacket;
+    {
+        std::lock_guard lock(playersMutex);
+        sendPacket = serializeOnePlayer(players[myID].position);
+    }
+
+    sf::Socket::Status sendStatus = socket.send(sendPacket);
+    if (sendStatus != sf::Socket::Status::Done) {
+        std::cerr << "Could not send data!" << std::endl;
+        return;
+    }
+}
+
+static void recieveDataFromServer(sf::TcpSocket &socket) {
+    sf::Packet recievePacket;
+    sf::Socket::Status recieveStatus = socket.receive(recievePacket);
+    if (recieveStatus != sf::Socket::Status::Done) {
+        std::cerr << "Could not receive data!" << std::endl;
+        return;
+    }
+    {
+        std::lock_guard lock(playersMutex);
+        players = deserializeData(recievePacket);
+    }
+}
+
+static void networkLoop(sf::TcpSocket &socket, int &myID) {
+    while (true) {          // while there is connection
+        sendDataToServer(socket, myID);
+        recieveDataFromServer(socket);
+    }
+}
+
 int main() {
     sf::RenderWindow window(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Tank");
     window.setFramerateLimit(FPS);
@@ -52,9 +89,11 @@ int main() {
     connectToServer(socket, myID);
 
     {
-        std::lock_guard<std::mutex> lock(playersMutex);
+        std::lock_guard lock(playersMutex);
         players.emplace(myID, Player(myID, PLAYER_X, PLAYER_Y));
     }
+
+    std::thread networkThread(networkLoop, std::ref(socket), std::ref(myID));
 
     while (window.isOpen()) {
         sf::Time deltaTime = clock.restart();
