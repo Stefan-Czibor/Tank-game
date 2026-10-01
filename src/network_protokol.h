@@ -14,7 +14,7 @@ sf::Packet serializeData(const std::unordered_map<int, Player> &players);
 std::unordered_map<int, Player> deserializeData(sf::Packet &packet);
 
 // Client -> server communication protocol
-sf::Packet serializeOnePlayer(sf::Vector2f& position);
+sf::Packet serializeOnePlayer(const sf::Vector2f& position);
 sf::Vector2f deserializeOnePlayer(sf::Packet& packet);
 
 

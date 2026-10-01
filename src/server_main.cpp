@@ -7,13 +7,26 @@
 #include <mutex>
 #include <thread>
 #include <iostream>
-
+#include <random>
 #include "network_protokol.h"
 #include "player.h"
 
-std::unordered_map<int, Player> players;
-std::mutex playersMutex;
-int nextPlayerID = 0;
+static std::unordered_map<int, Player> players;
+static std::mutex playersMutex;
+static int nextPlayerID = 0;
+static std::mt19937 rng(std::random_device{}());
+
+static sf::Vector2f randomSpawnPosition() {
+    std::uniform_int_distribution distX(0, SCREEN_WIDTH - static_cast<int>(PLAYER_WIDTH));
+    std::uniform_int_distribution distY(0, SCREEN_HEIGHT - static_cast<int>(PLAYER_HEIGHT));
+    return {static_cast<float>(distX(rng)), static_cast<float>(distY(rng))};
+}
+
+static sf::Color randomColor() {
+    std::uniform_int_distribution dist(50, 255);
+    return sf::Color(dist(rng), dist(rng), dist(rng));
+}
+
 
 static int sendClientID(sf::TcpSocket* socket) {    // sends client id & returns it
     int assignedID;
@@ -22,7 +35,10 @@ static int sendClientID(sf::TcpSocket* socket) {    // sends client id & returns
         assignedID = nextPlayerID;
         nextPlayerID++;
 
-        auto newPlayer = Player(assignedID, 40, 40);
+
+        sf::Vector2f spawnPosition = randomSpawnPosition();
+        sf::Color spawnColor = randomColor();
+        auto newPlayer = Player(assignedID, spawnPosition.x, spawnPosition.y, spawnColor);
         players.emplace(assignedID, newPlayer);
     }
 
@@ -30,7 +46,7 @@ static int sendClientID(sf::TcpSocket* socket) {    // sends client id & returns
     idPacket << assignedID;
     sf::Socket::Status sendStatus = socket->send(idPacket);
     if (sendStatus != sf::Socket::Status::Done) {
-        std::cerr << "Nem sikerült elküldeni az ID-t a kliensnek!" << std::endl;
+        std::cerr << "Couln't send client id" << std::endl;
     }
 
     return assignedID;
@@ -54,7 +70,7 @@ static void sendPlayersPosition(sf::TcpSocket* socket) {
 
     sf::Socket::Status sendStatus = socket->send(sendPacket);
     if (sendStatus != sf::Socket::Status::Done)
-        std::cerr << "Couldn't send data" << std::endl;
+        std::cerr << "Couldn't send player position" << std::endl;
 }
 
 static void handleClient(sf::TcpSocket* socket, int playerID) {
