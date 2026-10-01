@@ -13,7 +13,10 @@ sf::Packet serializeData(const std::unordered_map<int, Player> &players) {
     int playerCount = static_cast<int>(players.size());
     packet << playerCount;
     for (const auto& [id, player] : players) {
-        packet << id << player.position.x << player.position.y;
+        packet << id << player.position.x << player.position.y
+        << static_cast<std::uint8_t>(player.color.r)
+        << static_cast<std::uint8_t>(player.color.g)
+        << static_cast<std::uint8_t>(player.color.b);
     }
 
     return packet;
@@ -26,8 +29,10 @@ std::unordered_map<int, Player> deserializeData(sf::Packet &packet) {
 
     int playerID;
     float playerX, playerY;
+    std::uint8_t playerColorR, playerColorG, playerColorB;
+    
     for (int i = 0; i < playerCount; i++) {
-        packet >> playerID >> playerX >> playerY;
+        packet >> playerID >> playerX >> playerY >> playerColorR >> playerColorG >> playerColorB;
         players.emplace(playerID, Player(playerID, playerX, playerY));
     }
 

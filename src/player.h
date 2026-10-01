@@ -14,15 +14,15 @@ class Player {
 public:
     sf::Vector2f position;
     sf::Vector2f velocity;
-    sf::Vector2f size;
+    sf::Color color;
     sf::RectangleShape shape;
     int playerID{};
 
-    Player(int playerID, float x, float y) {
+    Player(int playerID, float x, float y, sf::Color color = sf::Color::Green) {
         position = sf::Vector2f(x, y);
         velocity = sf::Vector2f(0, 0);
         shape.setPosition(position);
-        shape.setFillColor(PLAYER_COLOR);
+        shape.setFillColor(color);
         shape.setSize(sf::Vector2f(PLAYER_WIDTH, PLAYER_HEIGHT));
         this->playerID = playerID;
     }

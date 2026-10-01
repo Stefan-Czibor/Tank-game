@@ -16,7 +16,7 @@ std::unordered_map<int, Player> players;
 std::mutex playersMutex;
 
 static void updateScreen(sf::RenderWindow &window, sf::Time deltaTime, int myID) {
-    std::lock_guard<std::mutex> lock(playersMutex);
+    std::lock_guard lock(playersMutex);
 
     sf::Vector2f direction = inputHandle::getMovementDirection();
     direction = direction * PLAYER_SPEED;   // direction vector with real length
@@ -53,7 +53,7 @@ static void sendDataToServer(sf::TcpSocket &socket, int &myID) {
 
     sf::Socket::Status sendStatus = socket.send(sendPacket);
     if (sendStatus != sf::Socket::Status::Done) {
-        std::cerr << "Could not send data!" << std::endl;
+        std::cerr << "Could not send data to server!" << std::endl;
         return;
     }
 }
@@ -62,7 +62,7 @@ static void recieveDataFromServer(sf::TcpSocket &socket) {
     sf::Packet recievePacket;
     sf::Socket::Status recieveStatus = socket.receive(recievePacket);
     if (recieveStatus != sf::Socket::Status::Done) {
-        std::cerr << "Could not receive data!" << std::endl;
+        std::cerr << "Could not receive data from server!" << std::endl;
         return;
     }
     {
@@ -90,7 +90,7 @@ int main() {
 
     {
         std::lock_guard lock(playersMutex);
-        players.emplace(myID, Player(myID, PLAYER_X, PLAYER_Y));
+        players.emplace(myID, Player(myID, myID * 50, myID * 50));
     }
 
     std::thread networkThread(networkLoop, std::ref(socket), std::ref(myID));
